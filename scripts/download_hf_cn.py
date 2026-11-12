@@ -115,9 +115,12 @@ def main(argv=None):
 
     if not args.snapshot and args.sha256:
         target = args.local_dir / args.file
-        if target.is_file() and sha256_file(target).lower() == args.sha256.lower():
-            print("Already downloaded and verified:", target)
-            return 0
+        if target.is_file():
+            if sha256_file(target).lower() == args.sha256.lower():
+                print("Already downloaded and verified:", target)
+                return 0
+            print("Removing cached file with mismatched SHA-256:", target, file=sys.stderr)
+            target.unlink()
 
     # Hugging Face reads these settings at IMPORT time.
     os.environ["HF_ENDPOINT"] = args.endpoint
@@ -155,6 +158,7 @@ def main(argv=None):
                 actual = sha256_file(result_path)
                 if actual.lower() != args.sha256.lower():
                     print("SHA-256 FAILED:", actual, "expected:", args.sha256, file=sys.stderr)
+                    result_path.unlink(missing_ok=True)
                     return 1
                 print("SHA-256 verified:", actual)
             else:
