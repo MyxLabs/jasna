@@ -1,0 +1,26 @@
+name: Hugging Face CN downloader tests
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/download_hf_cn.py'
+      - 'tests/test_download_hf_cn.py'
+      - '.github/workflows/hf-cn-download.yml'
+  push:
+    branches:
+      - compat/musa-s4000-basicvsrpp
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install pytest
+        run: python -m pip install pytest
+      - name: Verify downloader syntax and argument validation without network
+        run: |
+          python -m compileall -q scripts/download_hf_cn.py
+          python -m pytest -q tests/test_download_hf_cn.py
